@@ -1,0 +1,39 @@
+server {
+  listen 80;
+ 
+  server_name local.mysite.com;
+ 
+  root /var/www/MYSITE/web;
+ 
+  location ~ ^/(index|frontend|frontend_dev|backend|backend_dev)\.php$ {
+    include fastcgi_params;
+
+    set  $script     $uri;
+    set  $path_info  "";
+
+    if ($uri ~ "^(.+\.php)(/.*)") {
+        set  $script     $1;
+        set  $path_info  $2;
+    }
+
+    fastcgi_param SCRIPT_FILENAME $document_root$script;
+    fastcgi_param SCRIPT_NAME $script;
+    fastcgi_param PATH_INFO $path_info;
+    fastcgi_param ENV_APP "APP_NAME";
+    fastcgi_pass 127.0.0.1:9000;
+  }
+ 
+  location / {
+    index index.php;
+    try_files $uri /index.php?$args;
+  }
+
+ location ^~ /sf/ {
+        alias /usr/share/php/data/symfony/web/sf/;
+    }
+
+  location = /favicon.ico {
+    access_log     off;
+    log_not_found  off;
+  }
+}
